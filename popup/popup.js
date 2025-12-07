@@ -14,24 +14,44 @@ const timeDisp = document.getElementById('stopwatch')
 //StateButton
 const startbtn = document.getElementById('start-btn')
 
-let interval
+const StopWatch = new Stopwatch()
+let interval;
+let currentMin = 0;
+let currentSec = 0;
 
 window.addEventListener('DOMContentLoaded', ()=>{
-    browser.runtime.sendMessage('POPACTIVE')
+    const send = browser.runtime.sendMessage({
+        action : "ACTIVE"})
+
+    send.then(
+        (mess)=>{
+            currentMin = mess.currentMin
+            currentSec = mess.currentSec
+        },
+        (error)=>{
+            console.log(error)
+    })    
 })
 
-browser.tabs.onRemoved.addListener(()=>{
-    console.log("tab is closed")
+window.addEventListener('pagehide', ()=>{
+    const send = browser.runtime.sendMessage({
+        action : "INACTIVE",
+        min : currentMin,
+        sec : currentSec
+    })
 })
+
 startbtn.addEventListener('click', ()=>{
     if (!interval){
-        const StopWatch = new Stopwatch(25, 0)
-        StopWatch.createTimer()
-        interval = setInterval(()=>{
-            timeDisp.textContent = `${StopWatch.min} : ${StopWatch.sec} `
-        })
-    }else{
-
+        startTimer(25, 0)
     }
-  
 })
+
+function startTimer(min, sec){
+    StopWatch.createTimer(min, sec)
+    interval = setInterval(()=>{
+        timeDisp.textContent = `${StopWatch.min} : ${StopWatch.sec}`
+        currentMin = StopWatch.min;
+        currentSec = StopWatch.sec;
+    }, 1000)
+}
