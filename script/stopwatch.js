@@ -17,7 +17,4 @@ export default class Stopwatch{
     clearTimer(){
         clearInterval(this.interval)
     }
-
-
-
 }
